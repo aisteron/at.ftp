@@ -1,6 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
+const locateChrome = require('locate-chrome');
 
 const app = express();
 var jsonParser = bodyParser.json()
@@ -13,9 +14,16 @@ app.get('/', async (req, res) => {
 
 });
 
-app.post('/', jsonParser,async (req, res) => {
+app.post('/', jsonParser, async (req, res) => {
   
-  const browser  = await puppeteer.launch({ headless: false });
+  //const browser  = await puppeteer.launch({ headless: false });
+  const executablePath = await new Promise(resolve => locateChrome((arg)=> resolve(arg))) || '';
+  
+  const browser = await puppeteer.launch({
+    executablePath,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+
+});
   const page = await browser.newPage();
 
   await page.goto(req.body.url||'https://adventuretime.pro');
